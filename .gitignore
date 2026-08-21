@@ -1,0 +1,22 @@
+# Devenv
+.devenv*
+devenv.local.nix
+devenv.local.yaml
+
+# direnv
+.direnv
+
+# pre-commit
+.pre-commit-config.yaml
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# nvchecker runtime files
+.nvchecker/newver.json
+.nvchecker/oldver.json~
+
+# macOS
+.DS_Store

@@ -1,0 +1,6 @@
+DEFAULT_ARCH = "amd64"
+DEFAULT_COMPONENT = "appstore"
+DEFAULT_DISTRIBUTION = "eagle-pro"
+DEFAULT_PACKAGE = "deepin-wine10-stable"
+DEFAULT_REPO_ROOT = "https://pro-store-packages.uniontech.com/appstore/"
+DEFAULT_USER_AGENT = "Debian APT-HTTP/1.3"

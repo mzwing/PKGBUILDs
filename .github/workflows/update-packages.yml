@@ -1,0 +1,131 @@
+name: Update AUR packages
+
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-aur-packages
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: devenv shell -- bash {0}
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - uses: cachix/install-nix-action@v31
+
+      - uses: cachix/cachix-action@v17
+        with:
+          name: devenv
+
+      - name: Install devenv
+        shell: bash
+        run: nix profile add nixpkgs#devenv
+
+      - name: Check upstream versions
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          printf '[keys]\ngithub = "%s"\n' "$GH_TOKEN" > "$RUNNER_TEMP/nvchecker-keys.toml"
+          nvchecker --failures \
+            -k "$RUNNER_TEMP/nvchecker-keys.toml" \
+            -c nvchecker.toml
+          nvcmp -j -s none -c nvchecker.toml > "$RUNNER_TEMP/updates.json"
+
+      - name: Apply nvchecker results
+        run: |
+          python tools/apply_updates.py \
+            --input "$RUNNER_TEMP/updates.json" \
+            --applied-output "$RUNNER_TEMP/applied.txt"
+
+      - name: Detect empty update
+        id: updates
+        run: |
+          if [[ -s "$RUNNER_TEMP/applied.txt" ]]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate .SRCINFO
+        if: steps.updates.outputs.changed == 'true'
+        run: |
+          python tools/generate_srcinfo.py \
+            --packages-file "$RUNNER_TEMP/applied.txt" \
+            --require-makepkg
+
+      - name: Test and verify
+        if: steps.updates.outputs.changed == 'true'
+        run: |
+          python -m unittest discover -s tests
+          ruff check .
+          ruff format --check tools tests
+          ty check tools tests
+          python tools/verify.py --require-makepkg
+
+      - name: Accept processed nvchecker results
+        if: steps.updates.outputs.changed == 'true'
+        run: |
+          mapfile -t packages < "$RUNNER_TEMP/applied.txt"
+          nvtake -c nvchecker.toml "${packages[@]}"
+
+      - name: Configure AUR SSH key
+        if: steps.updates.outputs.changed == 'true'
+        env:
+          AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+        run: |
+          install -d -m 700 "$HOME/.ssh"
+          printf '%s\n' "$AUR_SSH_PRIVATE_KEY" > "$HOME/.ssh/id_ed25519"
+          chmod 600 "$HOME/.ssh/id_ed25519"
+          ssh-keyscan -t ed25519 aur.archlinux.org > "$HOME/.ssh/known_hosts.candidate"
+          ssh-keygen -lf "$HOME/.ssh/known_hosts.candidate" -E sha256 \
+            | grep -F 'SHA256:RFzBCUItH9LZS0cKB5UE6ceAYhBD5C8GeOBip8Z11+4'
+          mv "$HOME/.ssh/known_hosts.candidate" "$HOME/.ssh/known_hosts"
+
+      - name: Publish changed packages to AUR
+        if: steps.updates.outputs.changed == 'true'
+        run: |
+          git config --global user.name mzwing
+          git config --global user.email mzwing@mzwing.eu.org
+          while IFS= read -r package; do
+            aur_dir="$RUNNER_TEMP/aur-$package"
+            git clone "ssh://aur@aur.archlinux.org/$package.git" "$aur_dir"
+            cp "$package/PKGBUILD" "$package/.SRCINFO" "$aur_dir/"
+            if [[ -f "$package/.gitignore" ]]; then
+              cp "$package/.gitignore" "$aur_dir/"
+            fi
+            if git -C "$aur_dir" diff --quiet; then
+              continue
+            fi
+            version=$(awk '$1 == "pkgver" { pkgver=$3 } $1 == "pkgrel" { pkgrel=$3 } END { print pkgver "-" pkgrel }' "$package/.SRCINFO")
+            git -C "$aur_dir" add PKGBUILD .SRCINFO .gitignore
+            git -C "$aur_dir" commit -m "$package: update to $version"
+            git -C "$aur_dir" push origin master
+          done < "$RUNNER_TEMP/applied.txt"
+
+      - name: Commit updates to GitHub
+        if: steps.updates.outputs.changed == 'true'
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          mapfile -t packages < "$RUNNER_TEMP/applied.txt"
+          git config user.name mzwing
+          git config user.email mzwing@mzwing.eu.org
+          git add .nvchecker/oldver.json "${packages[@]}"
+          package_list=$(IFS=', '; echo "${packages[*]}")
+          git commit -m "chore(packages): update $package_list"
+          git push origin "HEAD:$DEFAULT_BRANCH"

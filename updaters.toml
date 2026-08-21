@@ -1,0 +1,71 @@
+[packages.deepin-wine10-stable]
+directory = "deepin-wine10-stable"
+updater = "command"
+command = ["{python}", "tools/deepin_wine10_stable/update.py"]
+
+[packages.spark-store-console-bin]
+directory = "spark-store-console-bin"
+updater = "declarative"
+
+[packages.spark-store-console-bin.version]
+variable = "_pkgver"
+transform = "hyphen_to_underscore"
+
+[[packages.spark-store-console-bin.assets]]
+kind = "json_asset"
+index_url = "https://gitee.com/api/v5/repos/spark-store-project/spark-store/releases?page=1&per_page=100&direction=desc"
+asset_name = "spark-store-console_{version}_all.deb"
+source_field = "source_x86_64"
+checksum_field = "sha256sums_x86_64"
+source_value = "{filename}::{url}"
+
+[packages.serenity-bin]
+directory = "serenity-bin"
+updater = "declarative"
+
+[packages.serenity-bin.version]
+variable = "_pkgver"
+transform = "remove_hyphen"
+
+[[packages.serenity-bin.assets]]
+kind = "template"
+download_url = "https://github.com/SagerNet/serenity/raw/v{version}/LICENSE"
+source_value = "LICENSE::$url/raw/v$_pkgver/LICENSE"
+source_field = "source"
+checksum_field = "sha256sums"
+
+[[packages.serenity-bin.assets]]
+kind = "template"
+download_url = "https://github.com/SagerNet/serenity/releases/download/v{version}/serenity_{version}_linux_386.pkg.tar.zst"
+source_value = "${_pkgname}_${_pkgver}_i686.tar.zst::$url/releases/download/v$_pkgver/${_pkgname}_${_pkgver}_linux_386.pkg.tar.zst"
+source_field = "source_i686"
+checksum_field = "sha256sums_i686"
+
+[[packages.serenity-bin.assets]]
+kind = "template"
+download_url = "https://github.com/SagerNet/serenity/releases/download/v{version}/serenity_{version}_linux_amd64.pkg.tar.zst"
+source_value = "${_pkgname}_${_pkgver}_x86_64.tar.zst::$url/releases/download/v$_pkgver/${_pkgname}_${_pkgver}_linux_amd64.pkg.tar.zst"
+source_field = "source_x86_64"
+checksum_field = "sha256sums_x86_64"
+
+[[packages.serenity-bin.assets]]
+kind = "template"
+download_url = "https://github.com/SagerNet/serenity/releases/download/v{version}/serenity_{version}_linux_arm64.pkg.tar.zst"
+source_value = "${_pkgname}_${_pkgver}_aarch64.tar.zst::$url/releases/download/v$_pkgver/${_pkgname}_${_pkgver}_linux_arm64.pkg.tar.zst"
+source_field = "source_aarch64"
+checksum_field = "sha256sums_aarch64"
+
+[[packages.serenity-bin.assets]]
+kind = "template"
+download_url = "https://github.com/SagerNet/serenity/releases/download/v{version}/serenity_{version}_linux_armv7.pkg.tar.zst"
+source_value = "${_pkgname}_${_pkgver}_armv7h.tar.zst::$url/releases/download/v$_pkgver/${_pkgname}_${_pkgver}_linux_armv7.pkg.tar.zst"
+source_field = "source_armv7h"
+checksum_field = "sha256sums_armv7h"
+
+[packages.hfd-git]
+directory = "hfd-git"
+updater = "vcs"
+backend = "git"
+source_array = "source"
+source_name = "hfd-git"
+version_function = "pkgver"
