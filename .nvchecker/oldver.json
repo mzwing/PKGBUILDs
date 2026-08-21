@@ -1,6 +1,18 @@
 {
-  "deepin-wine10-stable": "10.14deepin8",
-  "hfd-git": "258f20e",
-  "serenity-bin": "1.1.0-beta.3",
-  "spark-store-console-bin": "4.8.1"
+  "version": 2,
+  "data": {
+    "deepin-wine10-stable": {
+      "version": "10.14deepin11"
+    },
+    "hfd-git": {
+      "version": "dcc19a065877cb1c75d22b7c5662845e8c8df203",
+      "revision": "dcc19a065877cb1c75d22b7c5662845e8c8df203"
+    },
+    "serenity-bin": {
+      "version": "1.1.0-beta.3"
+    },
+    "spark-store-console-bin": {
+      "version": "4.8.1-console2"
+    }
+  }
 }
