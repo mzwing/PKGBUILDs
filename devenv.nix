@@ -1,4 +1,8 @@
-{pkgs, lib, ...}: {
+{
+  pkgs,
+  lib,
+  ...
+}: {
   languages.shell = {
     enable = true;
     lsp.enable = true;
@@ -29,6 +33,11 @@
     ++ lib.optionals stdenv.hostPlatform.isLinux [
       pacman
     ];
+
+  enterShell = lib.optionalString pkgs.stdenv.hostPlatform.isLinux ''
+    # nixpkgs pacman installs makepkg.conf into its own store path, not /etc
+    export MAKEPKG_CONF="${pkgs.pacman}/etc/makepkg.conf"
+  '';
 
   enterTest = ''
     bash-language-server --version
