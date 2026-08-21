@@ -22,10 +22,6 @@ def apply_updates(
     config: Mapping[str, Any],
     repository_root: Path,
 ) -> list[str]:
-    packages = config.get("packages")
-    if not isinstance(packages, Mapping):
-        raise TypeError("updaters.toml must contain a [packages] table")
-
     applied: list[str] = []
     seen: set[str] = set()
     for update in updates:
@@ -33,7 +29,7 @@ def apply_updates(
         if name in seen:
             raise ValueError(f"duplicate nvcmp result for {name}")
         seen.add(name)
-        package_config = packages.get(name)
+        package_config = config.get(name)
         if not isinstance(package_config, Mapping):
             raise TypeError(f"no updater configured for {name}")
 
@@ -98,7 +94,8 @@ def _run_command_updater(
     ):
         raise ValueError(f"{name}: command updater requires a command array")
     command = [sys.executable if item == "{python}" else item for item in configured]
-    command.extend(["--newver", newver, "--package-dir", str(config["directory"])])
+    package_dir = str(config.get("directory", name))
+    command.extend(["--newver", newver, "--package-dir", package_dir])
     if oldver is not None:
         command.extend(["--oldver", oldver])
     result = subprocess.run(command, cwd=repository_root, check=False)

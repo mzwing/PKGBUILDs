@@ -29,7 +29,7 @@ def apply_update(
     hash_url_fn: Hasher = sha256_url,
 ) -> None:
     del oldver
-    package_dir = repository_root / _required_string(config, "directory")
+    package_dir = repository_root / str(config.get("directory", package_name))
     pkgbuild_path = package_dir / "PKGBUILD"
     original = pkgbuild_path.read_text()
 
@@ -84,16 +84,16 @@ def _resolve_asset(
     fetch_json_fn: JsonFetcher,
 ) -> tuple[str, str]:
     kind = _required_string(asset, "kind")
-    if kind == "template":
-        download_url = _render(_required_string(asset, "download_url"), version=version)
+    if kind == "url":
+        download_url = _render(_required_string(asset, "url"), version=version)
         source_value = _render(
-            _required_string(asset, "source_value"),
+            _required_string(asset, "source_entry"),
             version=version,
             url=download_url,
         )
         return download_url, source_value
 
-    if kind == "json_asset":
+    if kind == "release_asset":
         index_url = _required_string(asset, "index_url")
         wanted_name = _render(_required_string(asset, "asset_name"), version=version)
         releases = fetch_json_fn(index_url)
@@ -123,7 +123,7 @@ def _resolve_asset(
                         f"{package_name}: matching asset has no download URL"
                     )
                 source_value = _render(
-                    _required_string(asset, "source_value"),
+                    _required_string(asset, "source_entry"),
                     version=version,
                     filename=wanted_name,
                     url=download_url,

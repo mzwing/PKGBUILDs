@@ -47,11 +47,8 @@ package() {{
             pkgbuild_path = package_dir / "PKGBUILD"
             pkgbuild_path.write_text(pkgbuild)
             config = {
-                "directory": "hfd-git",
                 "backend": "git",
-                "source_array": "source",
                 "source_name": "hfd-git",
-                "version_function": "pkgver",
             }
 
             apply_update("hfd-git", config, commits[0], commits[1], root)
@@ -86,7 +83,6 @@ pkgver() {{ cd "$pkgname"; echo r1.test; }}
             pkgbuild_path = package_dir / "PKGBUILD"
             pkgbuild_path.write_text(original)
             config = {
-                "directory": "hfd-git",
                 "backend": "git",
                 "source_name": "hfd-git",
             }

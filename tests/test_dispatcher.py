@@ -19,11 +19,8 @@ class DispatcherTest(unittest.TestCase):
             }
         ]
         config = {
-            "packages": {
-                "example-bin": {
-                    "directory": "example-bin",
-                    "updater": "declarative",
-                }
+            "example-bin": {
+                "updater": "declarative",
             }
         }
         with (
@@ -42,11 +39,11 @@ class DispatcherTest(unittest.TestCase):
     def test_rejects_unknown_package(self) -> None:
         updates = [{"name": "unknown", "oldver": "1", "newver": "2", "delta": "new"}]
         with self.assertRaises(TypeError):
-            apply_updates.apply_updates(updates, {"packages": {}}, Path.cwd())
+            apply_updates.apply_updates(updates, {}, Path.cwd())
 
     def test_rejects_non_update_delta(self) -> None:
         updates = [{"name": "example", "oldver": "1", "newver": "1", "delta": "equal"}]
-        config = {"packages": {"example": {"updater": "declarative"}}}
+        config = {"example": {"updater": "declarative"}}
         with self.assertRaises(ValueError):
             apply_updates.apply_updates(updates, config, Path.cwd())
 

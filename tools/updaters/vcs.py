@@ -26,7 +26,7 @@ def apply_update(
     if backend != "git":
         raise ValueError(f"{package_name}: unsupported VCS backend {backend!r}")
 
-    package_dir = repository_root / _required_string(config, "directory")
+    package_dir = repository_root / str(config.get("directory", package_name))
     pkgbuild_path = package_dir / "PKGBUILD"
     source_array = str(config.get("source_array", "source"))
     source_name = _required_string(config, "source_name")

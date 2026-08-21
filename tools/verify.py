@@ -15,21 +15,34 @@ if __package__ in {None, ""}:
 
 def verify(repository_root: Path, *, require_makepkg: bool) -> None:
     with (repository_root / "updaters.toml").open("rb") as config_file:
-        config = tomllib.load(config_file)
-    packages = config.get("packages")
-    if not isinstance(packages, dict):
-        raise TypeError("updaters.toml must contain packages")
+        packages = tomllib.load(config_file)
+    if not packages:
+        raise TypeError("updaters.toml must contain package tables")
+
+    with (repository_root / "nvchecker.toml").open("rb") as config_file:
+        checked = tomllib.load(config_file)
+    checked = {name for name in checked if name != "__config__"}
+    managed = set(packages)
+    if checked != managed:
+        detail = " ".join(
+            [
+                *sorted(f"+{name}" for name in checked - managed),
+                *sorted(f"-{name}" for name in managed - checked),
+            ]
+        )
+        raise ValueError(f"nvchecker.toml and updaters.toml disagree: {detail}")
 
     makepkg = shutil.which("makepkg")
     if require_makepkg and makepkg is None:
         raise RuntimeError("makepkg is required but was not found")
 
     for name, package in packages.items():
-        if not isinstance(package, dict) or not isinstance(
-            package.get("directory"), str
-        ):
+        if not isinstance(package, dict):
+            raise TypeError(f"{name}: invalid package configuration")
+        directory = package.get("directory", name)
+        if not isinstance(directory, str):
             raise TypeError(f"{name}: package directory is not configured")
-        package_dir = repository_root / package["directory"]
+        package_dir = repository_root / directory
         pkgbuild = package_dir / "PKGBUILD"
         syntax = subprocess.run(
             ["bash", "-n", str(pkgbuild)],

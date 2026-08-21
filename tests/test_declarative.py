@@ -11,7 +11,7 @@ class DeclarativeUpdaterTest(unittest.TestCase):
     def test_updates_json_asset_version_url_and_checksum(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
-            package_dir = root / "spark"
+            package_dir = root / "spark-store-console-bin"
             package_dir.mkdir()
             (package_dir / "PKGBUILD").write_text(
                 """_pkgver=4.8.1
@@ -22,19 +22,18 @@ sha256sums_x86_64=('oldsum')
 """
             )
             config = {
-                "directory": "spark",
                 "version": {
                     "variable": "_pkgver",
                     "transform": "hyphen_to_underscore",
                 },
                 "assets": [
                     {
-                        "kind": "json_asset",
+                        "kind": "release_asset",
                         "index_url": "https://api.invalid/releases",
                         "asset_name": "spark-store-console_{version}_all.deb",
                         "source_field": "source_x86_64",
                         "checksum_field": "sha256sums_x86_64",
-                        "source_value": "{filename}::{url}",
+                        "source_entry": "{filename}::{url}",
                     }
                 ],
             }
@@ -96,9 +95,9 @@ sha256sums_x86_64=('oldsum')
             for field, checksum in zip(fields, checksums, strict=True):
                 assets.append(
                     {
-                        "kind": "template",
-                        "download_url": f"https://download.invalid/{field}/{{version}}",
-                        "source_value": f"{field}::$url/v$_pkgver/{field}",
+                        "kind": "url",
+                        "url": f"https://download.invalid/{field}/{{version}}",
+                        "source_entry": f"{field}::$url/v$_pkgver/{field}",
                         "source_field": field,
                         "checksum_field": checksum,
                     }
