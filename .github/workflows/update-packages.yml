@@ -104,6 +104,7 @@ jobs:
         run: |
           git config --global user.name mzwing
           git config --global user.email mzwing@mzwing.eu.org
+          git config --global init.defaultBranch master
           while IFS= read -r package; do
             aur_dir="$RUNNER_TEMP/aur-$package"
             git clone "ssh://aur@aur.archlinux.org/$package.git" "$aur_dir"
