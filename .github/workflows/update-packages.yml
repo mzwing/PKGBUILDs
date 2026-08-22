@@ -109,13 +109,12 @@ jobs:
             aur_dir="$RUNNER_TEMP/aur-$package"
             git clone "ssh://aur@aur.archlinux.org/$package.git" "$aur_dir"
             cp "$package/PKGBUILD" "$package/.SRCINFO" "$aur_dir/"
-            # AUR 侧固定白名单（与包目录的 .gitignore 无关，monorepo 本地忽略规则不外泄）；末尾不带换行以保持与存量文件字节一致
             printf '**/*\n!.SRCINFO\n!.gitignore\n!PKGBUILD' >"$aur_dir/.gitignore"
-            if git -C "$aur_dir" diff --quiet; then
-              continue
-            fi
             version=$(awk '$1 == "pkgver" { pkgver=$3 } $1 == "pkgrel" { pkgrel=$3 } END { print pkgver "-" pkgrel }' "$package/.SRCINFO")
             git -C "$aur_dir" add PKGBUILD .SRCINFO .gitignore
+            if git -C "$aur_dir" diff --cached --quiet; then
+              continue
+            fi
             git -C "$aur_dir" commit -m "$package: update to $version"
             git -C "$aur_dir" push origin master
           done < "$RUNNER_TEMP/applied.txt"
