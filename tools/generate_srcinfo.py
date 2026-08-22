@@ -148,10 +148,10 @@ def _load_config(path: Path) -> dict:
 
 
 def _package_directory(config: dict, name: str, repository_root: Path) -> Path:
-    package = config.get("packages", {}).get(name)
-    if not isinstance(package, dict) or not isinstance(package.get("directory"), str):
+    package = config.get(name)
+    if not isinstance(package, dict):
         raise TypeError(f"no package directory configured for {name}")
-    return repository_root / package["directory"]
+    return repository_root / str(package.get("directory", name))
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:

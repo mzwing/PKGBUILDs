@@ -4,7 +4,27 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from tools.generate_srcinfo import fallback_srcinfo
+from tools.generate_srcinfo import _package_directory, fallback_srcinfo
+
+
+class PackageDirectoryTest(unittest.TestCase):
+    def test_resolves_top_level_package_tables(self) -> None:
+        config = {"example": {"updater": "declarative"}}
+        self.assertEqual(
+            _package_directory(config, "example", Path("/repo")),
+            Path("/repo/example"),
+        )
+
+    def test_honors_explicit_directory_override(self) -> None:
+        config = {"example": {"directory": "renamed"}}
+        self.assertEqual(
+            _package_directory(config, "example", Path("/repo")),
+            Path("/repo/renamed"),
+        )
+
+    def test_rejects_unknown_package(self) -> None:
+        with self.assertRaises(TypeError):
+            _package_directory({}, "unknown", Path("/repo"))
 
 
 class SrcinfoFallbackTest(unittest.TestCase):

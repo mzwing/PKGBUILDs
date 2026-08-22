@@ -24,3 +24,20 @@ prefix = "v"
 source = "git"
 git = "https://gist.github.com/padeoe/697678ab8e528b85a2a7bddafea1fa4f.git"
 use_commit = true
+
+[xwayclip]
+source = "github"
+github = "so1ve/xwayclip"
+use_latest_release = true
+prefix = "v"
+
+[xwayclip-bin]
+source = "github"
+github = "so1ve/xwayclip"
+use_latest_release = true
+prefix = "v"
+
+[xwayclip-git]
+source = "git"
+git = "https://github.com/so1ve/xwayclip.git"
+use_commit = true

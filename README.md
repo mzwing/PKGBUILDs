@@ -8,6 +8,9 @@ My AUR packages, with some scripts to help with updating them.
 - [hfd-git](hfd-git)
 - [serenity-bin](serenity-bin)
 - [spark-store-console-bin](spark-store-console-bin)
+- [xwayclip](xwayclip)
+- [xwayclip-bin](xwayclip-bin)
+- [xwayclip-git](xwayclip-git)
 
 ## Usage
 
