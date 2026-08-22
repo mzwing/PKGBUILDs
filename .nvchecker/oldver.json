@@ -13,6 +13,22 @@
     },
     "spark-store-console-bin": {
       "version": "4.8.1-console2"
+    },
+    "xwayclip": {
+      "version": "0.2.2",
+      "gitref": "refs/tags/v0.2.2",
+      "url": "https://github.com/so1ve/xwayclip/releases/tag/v0.2.2",
+      "creation_time": "2026-08-22T05:21:51Z"
+    },
+    "xwayclip-bin": {
+      "version": "0.2.2",
+      "gitref": "refs/tags/v0.2.2",
+      "url": "https://github.com/so1ve/xwayclip/releases/tag/v0.2.2",
+      "creation_time": "2026-08-22T05:21:51Z"
+    },
+    "xwayclip-git": {
+      "version": "548cfbce6d273abdab010c6e9654146b288c63ac",
+      "revision": "548cfbce6d273abdab010c6e9654146b288c63ac"
     }
   }
 }
