@@ -29,34 +29,28 @@ def apply_update(
     hash_url_fn: Hasher = sha256_url,
 ) -> None:
     del oldver
-    package_dir = repository_root / str(config.get("directory", package_name))
-    pkgbuild_path = package_dir / "PKGBUILD"
+    pkgbuild_path = repository_root / package_name / "PKGBUILD"
     original = pkgbuild_path.read_text()
 
-    version_config = _required_mapping(config, "version")
-    variable = _required_string(version_config, "variable")
-    transform = _required_string(version_config, "transform")
+    version_config = config["version"]
+    variable = version_config["variable"]
+    transform = version_config["transform"]
     transformed_version(newver, transform)
 
-    source_values: dict[str, list[str]] = {}
-    checksum_values: dict[str, list[str]] = {}
-    assets = config.get("assets")
-    if not isinstance(assets, list) or not assets:
-        raise ValueError(f"{package_name}: declarative updater requires assets")
-
-    for asset in assets:
-        if not isinstance(asset, Mapping):
-            raise TypeError(f"{package_name}: invalid asset declaration")
-        source_field = _required_string(asset, "source_field")
-        checksum_field = _required_string(asset, "checksum_field")
-        download_url, source_value = _resolve_asset(
-            package_name,
-            asset,
-            newver,
-            fetch_json_fn=fetch_json_fn,
-        )
-        source_values.setdefault(source_field, []).append(source_value)
-        checksum_values.setdefault(checksum_field, []).append(hash_url_fn(download_url))
+    sources: dict[str, list[str]] = {}
+    checksums: dict[str, list[str]] = {}
+    for asset in config["assets"]:
+        for arch in asset.get("arches", [None]):
+            alias = asset.get("arch_aliases", {}).get(arch, arch)
+            concrete = _with_arch(asset, arch, alias)
+            download_url, entry = _resolve_asset(
+                package_name, concrete, newver, fetch_json_fn=fetch_json_fn
+            )
+            suffix = "" if arch is None else f"_{arch}"
+            sources.setdefault(f"source{suffix}", []).append(entry)
+            checksums.setdefault(f"sha256sums{suffix}", []).append(
+                hash_url_fn(download_url)
+            )
 
     updated = replace_assignment(original, variable, newver)
     updated = replace_assignment(
@@ -68,12 +62,26 @@ def apply_update(
     if read_assignment(original, variable) != newver:
         updated = replace_assignment(updated, "pkgrel", "1", raw=True)
 
-    for field, values in source_values.items():
+    for field, values in sources.items():
         updated = replace_array(updated, field, values, expand_shell=True)
-    for field, values in checksum_values.items():
+    for field, values in checksums.items():
         updated = replace_array(updated, field, values)
 
     write_text_atomic(pkgbuild_path, updated)
+
+
+def _with_arch(
+    asset: Mapping[str, Any], arch: str | None, alias: str | None
+) -> dict[str, Any]:
+    """把模板中的 {arch}/{alias} 占位符替换为具体值。"""
+    if arch is None:
+        return dict(asset)
+    return {
+        key: value.replace("{alias}", alias).replace("{arch}", arch)
+        if isinstance(value, str)
+        else value
+        for key, value in asset.items()
+    }
 
 
 def _resolve_asset(
@@ -83,47 +91,33 @@ def _resolve_asset(
     *,
     fetch_json_fn: JsonFetcher,
 ) -> tuple[str, str]:
-    kind = _required_string(asset, "kind")
+    kind = asset["kind"]
     if kind == "url":
-        download_url = _render(_required_string(asset, "url"), version=version)
-        source_value = _render(
-            _required_string(asset, "source_entry"),
-            version=version,
-            url=download_url,
-        )
+        download_url = _render(asset["url"], version=version)
+        source_value = _render(asset["source_entry"], version=version, url=download_url)
         return download_url, source_value
 
     if kind == "release_asset":
-        index_url = _required_string(asset, "index_url")
-        wanted_name = _render(_required_string(asset, "asset_name"), version=version)
-        releases = fetch_json_fn(index_url)
-        if not isinstance(releases, list):
-            raise ValueError(f"{package_name}: JSON asset index is not a list")
-
+        wanted_name = _render(asset["asset_name"], version=version)
+        releases = fetch_json_fn(asset["index_url"])
         for release in releases:
-            if not isinstance(release, Mapping):
-                continue
-            release_assets = release.get("assets")
-            if not isinstance(release_assets, list):
-                continue
             matches = [
                 item
-                for item in release_assets
-                if isinstance(item, Mapping) and item.get("name") == wanted_name
+                for item in release.get("assets", [])
+                if item.get("name") == wanted_name
             ]
             if len(matches) > 1:
                 raise ValueError(
                     f"{package_name}: multiple {wanted_name!r} assets in one release"
                 )
-            if len(matches) == 1:
-                selected = matches[0]
-                download_url = selected.get("browser_download_url")
-                if not isinstance(download_url, str) or not download_url:
+            if matches:
+                download_url = matches[0].get("browser_download_url")
+                if not download_url:
                     raise ValueError(
-                        f"{package_name}: matching asset has no download URL"
+                        f"{package_name}: asset {wanted_name!r} has no download URL"
                     )
                 source_value = _render(
-                    _required_string(asset, "source_entry"),
+                    asset["source_entry"],
                     version=version,
                     filename=wanted_name,
                     url=download_url,
@@ -140,17 +134,3 @@ def _render(template: str, **values: str) -> str:
     for name, value in values.items():
         rendered = rendered.replace(f"{{{name}}}", value)
     return rendered
-
-
-def _required_mapping(config: Mapping[str, Any], key: str) -> Mapping[str, Any]:
-    value = config.get(key)
-    if not isinstance(value, Mapping):
-        raise TypeError(f"missing or invalid configuration table: {key}")
-    return value
-
-
-def _required_string(config: Mapping[str, Any], key: str) -> str:
-    value = config.get(key)
-    if not isinstance(value, str) or not value:
-        raise ValueError(f"missing or invalid configuration value: {key}")
-    return value

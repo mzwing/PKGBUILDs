@@ -1,49 +1,32 @@
 #!/usr/bin/env python3
+"""校验各包 PKGBUILD 语法与 .SRCINFO 同步。"""
+
 from __future__ import annotations
 
 import argparse
 import shutil
 import subprocess
 import sys
-import tomllib
 from collections.abc import Sequence
 from pathlib import Path
 
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from tools.packages import discover_packages
+
 
 def verify(repository_root: Path, *, require_makepkg: bool) -> None:
-    with (repository_root / "updaters.toml").open("rb") as config_file:
-        packages = tomllib.load(config_file)
+    packages = discover_packages(repository_root)
     if not packages:
-        raise TypeError("updaters.toml must contain package tables")
-
-    with (repository_root / "nvchecker.toml").open("rb") as config_file:
-        checked = tomllib.load(config_file)
-    checked = {name for name in checked if name != "__config__"}
-    managed = set(packages)
-    if checked != managed:
-        detail = " ".join(
-            [
-                *sorted(f"+{name}" for name in checked - managed),
-                *sorted(f"-{name}" for name in managed - checked),
-            ]
-        )
-        raise ValueError(f"nvchecker.toml and updaters.toml disagree: {detail}")
+        raise RuntimeError("no packages discovered (expected */update.toml)")
 
     makepkg = shutil.which("makepkg")
     if require_makepkg and makepkg is None:
         raise RuntimeError("makepkg is required but was not found")
 
     for name, package in packages.items():
-        if not isinstance(package, dict):
-            raise TypeError(f"{name}: invalid package configuration")
-        directory = package.get("directory", name)
-        if not isinstance(directory, str):
-            raise TypeError(f"{name}: package directory is not configured")
-        package_dir = repository_root / directory
-        pkgbuild = package_dir / "PKGBUILD"
+        pkgbuild = package.directory / "PKGBUILD"
         syntax = subprocess.run(
             ["bash", "-n", str(pkgbuild)],
             text=True,
@@ -57,7 +40,7 @@ def verify(repository_root: Path, *, require_makepkg: bool) -> None:
             continue
         generated = subprocess.run(
             [makepkg, "--printsrcinfo"],
-            cwd=package_dir,
+            cwd=package.directory,
             text=True,
             capture_output=True,
             check=False,
@@ -66,7 +49,7 @@ def verify(repository_root: Path, *, require_makepkg: bool) -> None:
             raise RuntimeError(
                 f"{name}: makepkg --printsrcinfo failed: {generated.stderr.strip()}"
             )
-        current = (package_dir / ".SRCINFO").read_text()
+        current = (package.directory / ".SRCINFO").read_text()
         if current != generated.stdout:
             raise ValueError(f"{name}: .SRCINFO is not generated from PKGBUILD")
 

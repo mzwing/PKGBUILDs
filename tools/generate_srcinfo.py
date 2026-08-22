@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+"""生成更新过的包的 .SRCINFO；无 makepkg 时按受管字段打补丁。"""
+
 from __future__ import annotations
 
 import argparse
@@ -6,7 +8,6 @@ import re
 import shutil
 import subprocess
 import sys
-import tomllib
 from collections.abc import Sequence
 from pathlib import Path
 
@@ -14,6 +15,7 @@ if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from tools.common.pkgbuild import write_text_atomic
+from tools.packages import discover_packages
 
 _MANAGED_SRCINFO_FIELD = re.compile(
     r"^(?:source(?:_[A-Za-z0-9_]+)?|sha256sums(?:_[A-Za-z0-9_]+)?|noextract)$"
@@ -26,13 +28,13 @@ def generate_for_packages(
     *,
     require_makepkg: bool,
 ) -> None:
-    config = _load_config(repository_root / "updaters.toml")
+    packages = discover_packages(repository_root)
     makepkg = shutil.which("makepkg")
     if require_makepkg and makepkg is None:
         raise RuntimeError("makepkg is required but was not found")
 
     for name in package_names:
-        package_dir = _package_directory(config, name, repository_root)
+        package_dir = packages[name].directory
         srcinfo_path = package_dir / ".SRCINFO"
         if makepkg is not None:
             result = subprocess.run(
@@ -140,18 +142,6 @@ done
         value = chunks[index + 1].decode()
         values.setdefault(key, []).append(value)
     return values
-
-
-def _load_config(path: Path) -> dict:
-    with path.open("rb") as config_file:
-        return tomllib.load(config_file)
-
-
-def _package_directory(config: dict, name: str, repository_root: Path) -> Path:
-    package = config.get(name)
-    if not isinstance(package, dict):
-        raise TypeError(f"no package directory configured for {name}")
-    return repository_root / str(package.get("directory", name))
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:

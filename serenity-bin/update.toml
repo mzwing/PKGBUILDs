@@ -1,0 +1,24 @@
+[check]
+source = "github"
+github = "SagerNet/serenity"
+use_latest_release = true
+prefix = "v"
+
+[update]
+updater = "declarative"
+
+[update.version]
+variable = "_pkgver"
+transform = "remove_hyphen"
+
+[[update.assets]]
+kind = "url"
+url = "https://github.com/SagerNet/serenity/raw/v{version}/LICENSE"
+source_entry = "LICENSE::$url/raw/v$_pkgver/LICENSE"
+
+[[update.assets]]
+kind = "url"
+arches = ["i686", "x86_64", "aarch64", "armv7h"]
+arch_aliases = { i686 = "386", x86_64 = "amd64", aarch64 = "arm64", armv7h = "armv7" }
+url = "https://github.com/SagerNet/serenity/releases/download/v{version}/serenity_{version}_linux_{alias}.pkg.tar.zst"
+source_entry = "${_pkgname}_${_pkgver}_{arch}.tar.zst::$url/releases/download/v$_pkgver/${_pkgname}_${_pkgver}_linux_{alias}.pkg.tar.zst"

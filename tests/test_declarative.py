@@ -8,7 +8,7 @@ from tools.updaters.declarative import apply_update
 
 
 class DeclarativeUpdaterTest(unittest.TestCase):
-    def test_updates_json_asset_version_url_and_checksum(self) -> None:
+    def test_release_asset_targets_arch_fields(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             package_dir = root / "spark-store-console-bin"
@@ -29,10 +29,9 @@ sha256sums_x86_64=('oldsum')
                 "assets": [
                     {
                         "kind": "release_asset",
+                        "arches": ["x86_64"],
                         "index_url": "https://api.invalid/releases",
                         "asset_name": "spark-store-console_{version}_all.deb",
-                        "source_field": "source_x86_64",
-                        "checksum_field": "sha256sums_x86_64",
                         "source_entry": "{filename}::{url}",
                     }
                 ],
@@ -74,38 +73,48 @@ sha256sums_x86_64=('oldsum')
             self.assertIn("hash-console2.deb", updated)
             self.assertNotIn("https://older.invalid", updated)
 
-    def test_template_assets_cover_all_serenity_architectures(self) -> None:
+    def test_arch_expansion_covers_all_serenity_architectures(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
-            package_dir = root / "serenity"
+            package_dir = root / "serenity-bin"
             package_dir.mkdir()
-            fields = [
-                "source",
-                "source_i686",
-                "source_x86_64",
-                "source_aarch64",
-                "source_armv7h",
+            lines = [
+                "_pkgver='1.0-beta.1'",
+                "pkgver=${_pkgver//-/}",
+                "pkgrel=2",
+                'source=("old")',
+                *[
+                    f'source_{arch}=("old")'
+                    for arch in ("i686", "x86_64", "aarch64", "armv7h")
+                ],
+                "sha256sums=('old')",
+                *[
+                    f"sha256sums_{arch}=('old')"
+                    for arch in ("i686", "x86_64", "aarch64", "armv7h")
+                ],
             ]
-            checksums = [field.replace("source", "sha256sums") for field in fields]
-            lines = ["_pkgver='1.0-beta.1'", "pkgver=${_pkgver//-/}", "pkgrel=2"]
-            lines.extend(f'{field}=("old")' for field in fields)
-            lines.extend(f"{field}=('old')" for field in checksums)
             (package_dir / "PKGBUILD").write_text("\n".join(lines) + "\n")
-            assets = []
-            for field, checksum in zip(fields, checksums, strict=True):
-                assets.append(
+            config = {
+                "version": {"variable": "_pkgver", "transform": "remove_hyphen"},
+                "assets": [
                     {
                         "kind": "url",
-                        "url": f"https://download.invalid/{field}/{{version}}",
-                        "source_entry": f"{field}::$url/v$_pkgver/{field}",
-                        "source_field": field,
-                        "checksum_field": checksum,
-                    }
-                )
-            config = {
-                "directory": "serenity",
-                "version": {"variable": "_pkgver", "transform": "remove_hyphen"},
-                "assets": assets,
+                        "url": "https://download.invalid/LICENSE/{version}",
+                        "source_entry": "LICENSE::$url/v$_pkgver/LICENSE",
+                    },
+                    {
+                        "kind": "url",
+                        "arches": ["i686", "x86_64", "aarch64", "armv7h"],
+                        "arch_aliases": {
+                            "i686": "386",
+                            "x86_64": "amd64",
+                            "aarch64": "arm64",
+                            "armv7h": "armv7",
+                        },
+                        "url": "https://download.invalid/linux_{alias}",
+                        "source_entry": "${_pkgname}_{arch}.tar.zst::$url/linux_{alias}",
+                    },
+                ],
             }
 
             apply_update(
@@ -114,15 +123,24 @@ sha256sums_x86_64=('oldsum')
                 "1.0-beta.1",
                 "1.1.0-beta.3",
                 root,
-                hash_url_fn=lambda url: f"hash-{url.split('/')[-2]}",
+                hash_url_fn=lambda url: f"hash-{url.rsplit('/', 1)[-1]}",
             )
 
             updated = (package_dir / "PKGBUILD").read_text()
             self.assertIn("_pkgver=1.1.0-beta.3", updated)
             self.assertIn("pkgver=${_pkgver//-/}", updated)
-            for field in fields:
-                self.assertIn(f"{field}::$url/v$_pkgver/{field}", updated)
-                self.assertIn(f"hash-{field}", updated)
+            self.assertIn("pkgrel=1", updated)
+            self.assertIn('source=("LICENSE::$url/v$_pkgver/LICENSE")', updated)
+            self.assertIn(
+                '"${_pkgname}_i686.tar.zst::$url/linux_386"',
+                updated,
+            )
+            self.assertIn(
+                '"${_pkgname}_armv7h.tar.zst::$url/linux_armv7"',
+                updated,
+            )
+            for field in ("source_i686", "sha256sums_x86_64", "sha256sums_armv7h"):
+                self.assertIn(f"{field}=", updated)
 
 
 if __name__ == "__main__":

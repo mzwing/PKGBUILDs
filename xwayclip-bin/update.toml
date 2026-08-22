@@ -1,0 +1,23 @@
+[check]
+source = "github"
+github = "so1ve/xwayclip"
+use_latest_release = true
+prefix = "v"
+
+[update]
+updater = "declarative"
+
+[update.version]
+variable = "_pkgver"
+transform = "hyphen_to_underscore"
+
+[[update.assets]]
+kind = "url"
+url = "https://raw.githubusercontent.com/so1ve/xwayclip/v{version}/LICENSE"
+source_entry = "LICENSE::$url/raw/v$_pkgver/LICENSE"
+
+[[update.assets]]
+kind = "url"
+arches = ["x86_64", "aarch64"]
+url = "https://github.com/so1ve/xwayclip/releases/download/v{version}/xwayclip-{arch}-unknown-linux-gnu"
+source_entry = "$_pkgname-{arch}-unknown-linux-gnu::$url/releases/download/v$_pkgver/$_pkgname-{arch}-unknown-linux-gnu"

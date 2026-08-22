@@ -36,6 +36,9 @@ jobs:
         shell: bash
         run: nix profile add nixpkgs#devenv
 
+      - name: Sync nvchecker config
+        run: python tools/sync_nvchecker.py
+
       - name: Check upstream versions
         env:
           GH_TOKEN: ${{ github.token }}
@@ -105,9 +108,8 @@ jobs:
             aur_dir="$RUNNER_TEMP/aur-$package"
             git clone "ssh://aur@aur.archlinux.org/$package.git" "$aur_dir"
             cp "$package/PKGBUILD" "$package/.SRCINFO" "$aur_dir/"
-            if [[ -f "$package/.gitignore" ]]; then
-              cp "$package/.gitignore" "$aur_dir/"
-            fi
+            # AUR 侧固定白名单（与包目录的 .gitignore 无关，monorepo 本地忽略规则不外泄）；末尾不带换行以保持与存量文件字节一致
+            printf '**/*\n!.SRCINFO\n!.gitignore\n!PKGBUILD' >"$aur_dir/.gitignore"
             if git -C "$aur_dir" diff --quiet; then
               continue
             fi

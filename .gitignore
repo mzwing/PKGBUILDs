@@ -14,7 +14,8 @@ devenv.local.yaml
 __pycache__/
 *.pyc
 
-# nvchecker runtime files
+# nvchecker runtime files（nvchecker.toml 由 tools/sync_nvchecker.py 生成，不入库）
+/nvchecker.toml
 .nvchecker/newver.json
 .nvchecker/oldver.json~
 

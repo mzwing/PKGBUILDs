@@ -46,12 +46,7 @@ package() {{
 """
             pkgbuild_path = package_dir / "PKGBUILD"
             pkgbuild_path.write_text(pkgbuild)
-            config = {
-                "backend": "git",
-                "source_name": "hfd-git",
-            }
-
-            apply_update("hfd-git", config, commits[0], commits[1], root)
+            apply_update("hfd-git", {}, commits[0], commits[1], root)
 
             updated = pkgbuild_path.read_text()
             self.assertIn(f"pkgver=r2.{commits[1][:7]}", updated)
@@ -82,13 +77,8 @@ pkgver() {{ cd "$pkgname"; echo r1.test; }}
 """
             pkgbuild_path = package_dir / "PKGBUILD"
             pkgbuild_path.write_text(original)
-            config = {
-                "backend": "git",
-                "source_name": "hfd-git",
-            }
-
             with self.assertRaises(RuntimeError):
-                apply_update("hfd-git", config, None, "0" * 40, root)
+                apply_update("hfd-git", {}, None, "0" * 40, root)
             self.assertEqual(pkgbuild_path.read_text(), original)
 
     def test_failing_pkgver_function_does_not_write_pkgbuild(self) -> None:
@@ -116,14 +106,8 @@ pkgver() {{ return 1; }}
 """
             pkgbuild_path = package_dir / "PKGBUILD"
             pkgbuild_path.write_text(original)
-            config = {
-                "directory": "hfd-git",
-                "backend": "git",
-                "source_name": "hfd-git",
-            }
-
             with self.assertRaises(RuntimeError):
-                apply_update("hfd-git", config, None, commit, root)
+                apply_update("hfd-git", {}, None, commit, root)
             self.assertEqual(pkgbuild_path.read_text(), original)
 
     @staticmethod

@@ -1,0 +1,12 @@
+[check]
+source = "cmd"
+cmd = "python tools/check_version.py deepin-wine10-stable"
+
+[update]
+updater = "apt"
+repo_root = "https://pro-store-packages.uniontech.com/appstore/"
+distribution = "eagle-pro"
+component = "appstore"
+architecture = "amd64"
+package = "deepin-wine10-stable"
+variable = "_pkgver"

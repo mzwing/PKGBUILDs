@@ -2,7 +2,7 @@
 name = "pkgbuild-updaters"
 version = "0.1.0"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = ["tomli-w>=1.0"]
 
 [dependency-groups]
 dev = [

@@ -14,13 +14,13 @@ def fetch_bytes(url: str, *, user_agent: str = USER_AGENT) -> bytes:
         return response.read()
 
 
-def fetch_json(url: str) -> Any:
-    return json.loads(fetch_bytes(url).decode("utf-8"))
+def fetch_json(url: str, *, user_agent: str = USER_AGENT) -> Any:
+    return json.loads(fetch_bytes(url, user_agent=user_agent).decode("utf-8"))
 
 
-def sha256_url(url: str) -> str:
+def sha256_url(url: str, *, user_agent: str = USER_AGENT) -> str:
     digest = hashlib.sha256()
-    request = Request(url, headers={"User-Agent": USER_AGENT})
+    request = Request(url, headers={"User-Agent": user_agent})
     with urlopen(request) as response:
         while chunk := response.read(1024 * 1024):
             digest.update(chunk)

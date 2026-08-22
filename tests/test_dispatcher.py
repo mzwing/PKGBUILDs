@@ -9,41 +9,43 @@ from tools import apply_updates
 
 
 class DispatcherTest(unittest.TestCase):
-    def test_routes_standard_nvcmp_json_without_package_logic(self) -> None:
-        updates = [
-            {
-                "name": "example-bin",
-                "oldver": "1.0",
-                "newver": "2.0",
-                "delta": "new",
-            }
-        ]
-        config = {
-            "example-bin": {
-                "updater": "declarative",
-            }
-        }
+    def test_routes_via_registry(self) -> None:
+        updates = [{"name": "example-bin", "oldver": "1.0", "newver": "2.0"}]
+        config = {"example-bin": {"updater": "declarative"}}
+        calls: list[tuple] = []
+
+        def fake(name, package_config, oldver, newver, repository_root):
+            calls.append((name, oldver, newver))
+
         with (
             tempfile.TemporaryDirectory() as temporary,
-            mock.patch.object(apply_updates.declarative, "apply_update") as updater,
+            mock.patch.dict(apply_updates.UPDATERS, {"declarative": fake}),
         ):
-            applied = apply_updates.apply_updates(
-                updates,
-                config,
-                Path(temporary),
-            )
+            applied = apply_updates.apply_updates(updates, config, Path(temporary))
+
         self.assertEqual(applied, ["example-bin"])
-        updater.assert_called_once()
-        self.assertEqual(updater.call_args.args[2:4], ("1.0", "2.0"))
+        self.assertEqual(calls, [("example-bin", "1.0", "2.0")])
 
     def test_rejects_unknown_package(self) -> None:
-        updates = [{"name": "unknown", "oldver": "1", "newver": "2", "delta": "new"}]
-        with self.assertRaises(TypeError):
+        updates = [{"name": "unknown", "oldver": "1", "newver": "2"}]
+        with self.assertRaises(KeyError):
             apply_updates.apply_updates(updates, {}, Path.cwd())
 
-    def test_rejects_non_update_delta(self) -> None:
-        updates = [{"name": "example", "oldver": "1", "newver": "1", "delta": "equal"}]
-        config = {"example": {"updater": "declarative"}}
+    def test_rejects_duplicate_results(self) -> None:
+        updates = [
+            {"name": "example", "oldver": "1", "newver": "2"},
+            {"name": "example", "oldver": "1", "newver": "2"},
+        ]
+        config = {"example": {"updater": "vcs"}}
+        with (
+            mock.patch.dict(apply_updates.UPDATERS, {"vcs": lambda *_args: None}),
+            self.assertRaises(ValueError),
+        ):
+            apply_updates.apply_updates(updates, config, Path.cwd())
+
+    def test_rejects_invalid_result(self) -> None:
+        updates = [{"name": "", "newver": "2"}]
+        config = {"": {"updater": "vcs"}}
         with self.assertRaises(ValueError):
             apply_updates.apply_updates(updates, config, Path.cwd())
 

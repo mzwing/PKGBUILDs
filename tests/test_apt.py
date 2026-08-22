@@ -3,22 +3,25 @@ from __future__ import annotations
 import contextlib
 import io
 import unittest
+from pathlib import Path
 from unittest import mock
 
-from tools.deepin_wine10_stable import check
-from tools.deepin_wine10_stable.apt_metadata import (
+from tools import check_version
+from tools.packages import Package
+from tools.updaters.apt import (
     PackageRecord,
     compare_debian_versions,
     decode_metadata,
     parse_packages,
     select_latest_record,
     select_record_by_version,
+    update_pkgbuild_text,
 )
-from tools.deepin_wine10_stable.config import DEFAULT_REPO_ROOT
-from tools.deepin_wine10_stable.update import update_pkgbuild_text
+
+REPO_ROOT = "https://pro-store-packages.uniontech.com/appstore/"
 
 
-class DeepinUpdaterTest(unittest.TestCase):
+class AptUpdaterTest(unittest.TestCase):
     def setUp(self) -> None:
         self.records = parse_packages(
             """Package: deepin-wine10-stable
@@ -64,7 +67,7 @@ SHA256: newsha
         self.assertGreater(compare_debian_versions("2:1.0", "1:9.9"), 0)
         self.assertGreater(compare_debian_versions("1.0-2", "1.0-1"), 0)
 
-    def test_updates_only_deepin_pkgbuild_fields(self) -> None:
+    def test_updates_only_apt_pkgbuild_fields(self) -> None:
         record = PackageRecord(
             package="deepin-wine10-stable",
             version="10.14deepin8-1",
@@ -84,19 +87,32 @@ noextract=(
 )
 sha256sums=('oldsha')
 """
-        updated = update_pkgbuild_text(original, record, DEFAULT_REPO_ROOT)
+        updated = update_pkgbuild_text(original, record, REPO_ROOT, "_pkgver")
         self.assertIn("_pkgver=10.14deepin8-1", updated)
         self.assertIn("pkgrel=1", updated)
         self.assertIn(record.sha256, updated)
         self.assertIn("pool/appstore/d/deepin-wine10-stable", updated)
 
     def test_checker_stdout_is_only_version(self) -> None:
+        fake = Package(
+            name="deepin-wine10-stable",
+            directory=Path("deepin-wine10-stable"),
+            check={},
+            update={},
+        )
         output = io.StringIO()
         with (
-            mock.patch.object(check, "check_version", return_value="10.14deepin8"),
+            mock.patch.object(
+                check_version,
+                "discover_packages",
+                return_value={"deepin-wine10-stable": fake},
+            ),
+            mock.patch.object(
+                check_version.apt, "latest_version", return_value="10.14deepin8"
+            ),
             contextlib.redirect_stdout(output),
         ):
-            result = check.main()
+            result = check_version.main(["deepin-wine10-stable"])
         self.assertEqual(result, 0)
         self.assertEqual(output.getvalue(), "10.14deepin8\n")
 

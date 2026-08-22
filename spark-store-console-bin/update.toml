@@ -1,0 +1,21 @@
+[check]
+source = "regex"
+url = "https://gitee.com/api/v5/repos/spark-store-project/spark-store/releases?page=1&per_page=100&direction=desc"
+regex = '''"name"\s*:\s*"spark-store-console_([^"/]+)_all\.deb"'''
+include_regex = '''[0-9].*-console[0-9]+(?:\.[0-9]+)?'''
+sort_version_key = "parse_version"
+encoding = "utf-8"
+
+[update]
+updater = "declarative"
+
+[update.version]
+variable = "_pkgver"
+transform = "hyphen_to_underscore"
+
+[[update.assets]]
+kind = "release_asset"
+arches = ["x86_64"]
+index_url = "https://gitee.com/api/v5/repos/spark-store-project/spark-store/releases?page=1&per_page=100&direction=desc"
+asset_name = "spark-store-console_{version}_all.deb"
+source_entry = "{filename}::{url}"

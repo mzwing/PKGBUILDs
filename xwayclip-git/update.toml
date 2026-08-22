@@ -1,0 +1,7 @@
+[check]
+source = "git"
+git = "https://github.com/so1ve/xwayclip.git"
+use_commit = true
+
+[update]
+updater = "vcs"
