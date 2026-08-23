@@ -1,12 +1,14 @@
 pkgbase = xwayclip-bin
 	pkgdesc = Bidirectional clipboard synchronization between X11 and Wayland for poorly implemented apps like Linux QQ
 	pkgver = 0.2.2
-	pkgrel = 1
+	pkgrel = 2
 	url = https://github.com/so1ve/xwayclip
 	arch = x86_64
 	arch = aarch64
 	license = MIT
-	provides = xwayclip
+	depends = gcc-libs
+	depends = glibc
+	provides = xwayclip=0.2.2
 	conflicts = xwayclip
 	conflicts = xwayclip-git
 	source = LICENSE::https://github.com/so1ve/xwayclip/raw/v0.2.2/LICENSE

@@ -14,7 +14,9 @@ concurrency:
 
 defaults:
   run:
-    shell: devenv shell -- bash {0}
+    # A custom shell string runs a bare `bash {0}`; only the built-in `bash`
+    # shell adds -eo pipefail. Spell it out so a failing command aborts the step.
+    shell: devenv shell -- bash -eo pipefail {0}
 
 jobs:
   update:
@@ -36,8 +38,14 @@ jobs:
         shell: bash
         run: nix profile add nixpkgs#devenv
 
+      # Runs outside `devenv shell` so the old environment is never built, and
+      # before every other step so they all use the refreshed one.
+      - name: Update devenv inputs
+        shell: bash
+        run: devenv update
+
       - name: Sync nvchecker config
-        run: python tools/sync_nvchecker.py
+        run: python tools/cli.py sync
 
       - name: Check upstream versions
         env:
@@ -51,7 +59,7 @@ jobs:
 
       - name: Apply nvchecker results
         run: |
-          python tools/apply_updates.py \
+          python tools/cli.py apply \
             --input "$RUNNER_TEMP/updates.json" \
             --applied-output "$RUNNER_TEMP/applied.txt"
 
@@ -67,18 +75,17 @@ jobs:
       - name: Generate .SRCINFO
         if: steps.updates.outputs.changed == 'true'
         run: |
-          python tools/generate_srcinfo.py \
+          python tools/cli.py srcinfo \
             --packages-file "$RUNNER_TEMP/applied.txt" \
             --require-makepkg
 
-      - name: Test and verify
+      # Gates the AUR push on content that only exists at this point: the
+      # PKGBUILDs and .SRCINFO files the previous two steps just generated.
+      # Linting and unit tests are not repeated here -- they cover tools/, which
+      # this workflow never modifies, and check.yml already ran them on push.
+      - name: Verify generated packages
         if: steps.updates.outputs.changed == 'true'
-        run: |
-          python -m unittest discover -s tests
-          ruff check .
-          ruff format --check tools tests
-          ty check tools tests
-          python tools/verify.py --require-makepkg
+        run: python tools/cli.py verify --require-makepkg
 
       - name: Accept processed nvchecker results
         if: steps.updates.outputs.changed == 'true'
@@ -105,29 +112,37 @@ jobs:
           git config --global user.name mzwing
           git config --global user.email mzwing@mzwing.eu.org
           git config --global init.defaultBranch master
-          while IFS= read -r package; do
-            aur_dir="$RUNNER_TEMP/aur-$package"
-            git clone "ssh://aur@aur.archlinux.org/$package.git" "$aur_dir"
-            cp "$package/PKGBUILD" "$package/.SRCINFO" "$aur_dir/"
-            printf '**/*\n!.SRCINFO\n!.gitignore\n!PKGBUILD' >"$aur_dir/.gitignore"
-            version=$(awk '$1 == "pkgver" { pkgver=$3 } $1 == "pkgrel" { pkgrel=$3 } END { print pkgver "-" pkgrel }' "$package/.SRCINFO")
-            git -C "$aur_dir" add PKGBUILD .SRCINFO .gitignore
-            if git -C "$aur_dir" diff --cached --quiet; then
-              continue
-            fi
-            git -C "$aur_dir" commit -m "$package: update to $version"
-            git -C "$aur_dir" push origin master
-          done < "$RUNNER_TEMP/applied.txt"
+          python tools/cli.py publish \
+            --packages-file "$RUNNER_TEMP/applied.txt" \
+            --work-dir "$RUNNER_TEMP/aur"
 
+      # Runs unconditionally: `devenv update` may have refreshed devenv.lock even
+      # on a night when no package changed. Recording it keeps check.yml and this
+      # workflow on the same toolchain and makes a bad input bump bisectable.
       - name: Commit updates to GitHub
-        if: steps.updates.outputs.changed == 'true'
         env:
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
-          mapfile -t packages < "$RUNNER_TEMP/applied.txt"
           git config user.name mzwing
           git config user.email mzwing@mzwing.eu.org
-          git add .nvchecker/oldver.json "${packages[@]}"
-          package_list=$(IFS=', '; echo "${packages[*]}")
-          git commit -m "chore(packages): update $package_list"
-          git push origin "HEAD:$DEFAULT_BRANCH"
+          committed=false
+
+          if ! git diff --quiet -- devenv.lock; then
+            git add devenv.lock
+            git commit -m "chore(devenv): update inputs"
+            committed=true
+          fi
+
+          if [[ -s "$RUNNER_TEMP/applied.txt" ]]; then
+            mapfile -t packages < "$RUNNER_TEMP/applied.txt"
+            git add .nvchecker/oldver.json "${packages[@]}"
+            package_list=$(IFS=', '; echo "${packages[*]}")
+            git commit -m "chore(packages): update $package_list"
+            committed=true
+          fi
+
+          if [[ "$committed" == true ]]; then
+            git push origin "HEAD:$DEFAULT_BRANCH"
+          else
+            echo "nothing to commit"
+          fi

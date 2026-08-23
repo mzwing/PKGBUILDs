@@ -1,7 +1,13 @@
+"""Textual edits to PKGBUILD files.
+
+Only the fields this repository manages are rewritten; everything else in the
+file (comments, layout, build functions) is preserved byte for byte.
+"""
+
 from __future__ import annotations
 
 import re
-from pathlib import Path
+import shlex
 
 _SAFE_VALUE = re.compile(r"^[A-Za-z0-9._+:-]+$")
 
@@ -32,10 +38,7 @@ def replace_array(
     *,
     expand_shell: bool = False,
 ) -> str:
-    pattern = re.compile(
-        rf"^{re.escape(name)}=\(.*?\)(?=\n|\Z)",
-        flags=re.MULTILINE | re.DOTALL,
-    )
+    pattern = _array_pattern(name)
     matches = list(pattern.finditer(text))
     if len(matches) != 1:
         raise ValueError(
@@ -51,34 +54,41 @@ def replace_array(
     return pattern.sub(replacement, text, count=1)
 
 
-def write_text_atomic(path: Path, text: str) -> None:
-    temporary = path.with_name(f".{path.name}.tmp")
-    temporary.write_text(text)
-    temporary.replace(path)
+def has_array(text: str, name: str) -> bool:
+    return _array_pattern(name).search(text) is not None
 
 
-def transformed_version(version: str, transform: str) -> str:
-    if transform == "hyphen_to_underscore":
-        return version.replace("-", "_")
-    if transform == "remove_hyphen":
-        return version.replace("-", "")
-    if transform == "identity":
-        return version
-    raise ValueError(f"unsupported version transform: {transform}")
+def read_array(text: str, name: str) -> list[str]:
+    """Return the literal (unexpanded) elements of an array assignment."""
+    match = _array_pattern(name).search(text)
+    if match is None:
+        raise ValueError(f"missing PKGBUILD array assignment: {name}")
+    body = match.group(0)[len(name) + 2 : -1]
+    # `#` is not a comment here: git sources use `#tag=`/`#commit=` fragments.
+    lexer = shlex.shlex(body, posix=True)
+    lexer.whitespace_split = True
+    lexer.commenters = ""
+    return list(lexer)
 
 
-def pkgver_expression(variable: str, transform: str) -> str:
-    if transform == "hyphen_to_underscore":
-        return f"${{{variable}//-/_}}"
-    if transform == "remove_hyphen":
-        return f"${{{variable}//-/}}"
-    if transform == "identity":
-        return f"${variable}"
-    raise ValueError(f"unsupported version transform: {transform}")
+def source_url(entry: str) -> str:
+    """Return the URL of a source entry, dropping any ``filename::`` prefix.
+
+    Splitting on the first ``::`` is safe: a URL scheme only ever contains a
+    single colon before its slashes.
+    """
+    return entry.split("::", 1)[-1]
 
 
 def _assignment_pattern(name: str) -> re.Pattern[str]:
     return re.compile(rf"^{re.escape(name)}=(.*)$", flags=re.MULTILINE)
+
+
+def _array_pattern(name: str) -> re.Pattern[str]:
+    return re.compile(
+        rf"^{re.escape(name)}=\(.*?\)(?=\n|\Z)",
+        flags=re.MULTILINE | re.DOTALL,
+    )
 
 
 def _format_scalar(value: str) -> str:

@@ -1,0 +1,16 @@
+[check]
+source = "github"
+github = "so1ve/latchshot"
+use_latest_release = true
+prefix = "v"
+
+[update]
+updater = "declarative"
+
+[update.version]
+variable = "_pkgver"
+transform = "hyphen_to_underscore"
+
+[[update.assets]]
+kind = "url"
+source_entry = "$pkgname-$_pkgver.tar.gz::$url/archive/refs/tags/v$_pkgver.tar.gz"

@@ -13,5 +13,4 @@ transform = "hyphen_to_underscore"
 
 [[update.assets]]
 kind = "url"
-url = "https://github.com/so1ve/xwayclip/archive/refs/tags/v{version}.tar.gz"
 source_entry = "$pkgname-$_pkgver.tar.gz::$url/archive/refs/tags/v$_pkgver.tar.gz"

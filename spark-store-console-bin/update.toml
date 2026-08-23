@@ -15,7 +15,8 @@ transform = "hyphen_to_underscore"
 
 [[update.assets]]
 kind = "release_asset"
-arches = ["x86_64"]
 index_url = "https://gitee.com/api/v5/repos/spark-store-project/spark-store/releases?page=1&per_page=100&direction=desc"
 asset_name = "spark-store-console_{version}_all.deb"
-source_entry = "{filename}::{url}"
+# The file name stays templated on $_pkgver so it matches noextract; only the
+# release URL, which upstream tags independently, is written out literally.
+source_entry = "spark-store-console_${_pkgver}_all.deb::{url}"

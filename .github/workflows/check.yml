@@ -1,0 +1,53 @@
+name: Check
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    # A custom shell string runs a bare `bash {0}`; only the built-in `bash`
+    # shell adds -eo pipefail. Spell it out so a failing command aborts the step.
+    shell: devenv shell -- bash -eo pipefail {0}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: cachix/install-nix-action@v31
+
+      - uses: cachix/cachix-action@v17
+        with:
+          name: devenv
+
+      - name: Install devenv
+        shell: bash
+        run: nix profile add nixpkgs#devenv
+
+      - name: Lint
+        run: |
+          ruff check .
+          ruff format --check tools tests
+
+      - name: Type check
+        run: ty check tools tests
+
+      - name: Test
+        run: python -m unittest discover -s tests
+
+      - name: Build nvchecker config
+        run: python tools/cli.py sync
+
+      - name: Verify packages
+        run: python tools/cli.py verify --require-makepkg

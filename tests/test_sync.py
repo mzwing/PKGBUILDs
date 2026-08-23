@@ -6,16 +6,17 @@ from pathlib import Path
 
 import tomli_w
 
+from tools.commands.sync_nvchecker import build_nvchecker_config
 from tools.packages import Package
-from tools.sync_nvchecker import build_nvchecker_config
 
 
-def make_package(name: str) -> Package:
+def make_package(name: str, check: dict | None = None) -> Package:
     return Package(
         name=name,
         directory=Path(name),
-        check={"source": "github", "github": f"so1ve/{name}"},
-        update={"updater": "vcs"},
+        check=check or {"source": "github", "github": f"so1ve/{name}"},
+        updater_name="vcs",
+        update={},
     )
 
 
@@ -54,6 +55,30 @@ class SyncNvcheckerTest(unittest.TestCase):
             build_nvchecker_config(dict(reversed(list(packages.items())))), second
         )
         self.assertEqual(first.getvalue(), second.getvalue())
+
+    def test_fills_in_the_command_for_cmd_sources(self) -> None:
+        packages = {"deepin": make_package("deepin", {"source": "cmd"})}
+        config = build_nvchecker_config(
+            packages, interpreter="/venv/bin/python", cli_path="/repo/tools/cli.py"
+        )
+        self.assertEqual(
+            config["deepin"]["cmd"],
+            "/venv/bin/python /repo/tools/cli.py version deepin",
+        )
+
+    def test_keeps_an_explicit_command(self) -> None:
+        packages = {
+            "deepin": make_package("deepin", {"source": "cmd", "cmd": "echo 1"})
+        }
+        config = build_nvchecker_config(
+            packages, interpreter="/venv/bin/python", cli_path="/repo/tools/cli.py"
+        )
+        self.assertEqual(config["deepin"]["cmd"], "echo 1")
+
+    def test_does_not_mutate_the_package(self) -> None:
+        package = make_package("deepin", {"source": "cmd"})
+        build_nvchecker_config({"deepin": package}, interpreter="/p", cli_path="/c.py")
+        self.assertNotIn("cmd", package.check)
 
 
 if __name__ == "__main__":

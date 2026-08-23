@@ -1,17 +1,27 @@
-"""更新器注册表：update.toml 里的 updater 名到实现的映射。"""
+"""Updater registry: maps the ``updater`` name in update.toml to an implementation."""
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
-from pathlib import Path
 from typing import Any
 
-from tools.updaters import apt, declarative, vcs
+from tools.updaters.apt import AptUpdater
+from tools.updaters.base import UpdateContext, Updater
+from tools.updaters.declarative import DeclarativeUpdater
+from tools.updaters.vcs import VcsUpdater
 
-Updater = Callable[[str, Mapping[str, Any], str | None, str, Path], None]
+__all__ = ["UPDATERS", "UpdateContext", "Updater", "get_updater"]
 
-UPDATERS: dict[str, Updater] = {
-    "declarative": declarative.apply_update,
-    "vcs": vcs.apply_update,
-    "apt": apt.apply_update,
+UPDATERS: dict[str, Updater[Any]] = {
+    updater.name: updater
+    for updater in (DeclarativeUpdater(), VcsUpdater(), AptUpdater())
 }
+
+
+def get_updater(name: str) -> Updater[Any]:
+    try:
+        return UPDATERS[name]
+    except KeyError:
+        supported = ", ".join(sorted(UPDATERS))
+        raise ValueError(
+            f"unknown updater {name!r}; expected one of: {supported}"
+        ) from None

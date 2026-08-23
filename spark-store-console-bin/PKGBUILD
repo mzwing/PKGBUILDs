@@ -4,18 +4,24 @@
 pkgname=spark-store-console-bin
 _pkgver=4.8.1-console2
 pkgver=${_pkgver//-/_}
-pkgrel=1
+pkgrel=2
 pkgdesc='Spark Store, A community powered app store, based on DTK. (Console version)'
-arch=('x86_64')
+arch=('any')
 url='https://www.spark-app.store/'
-license=('GPL-3.0')
+license=('GPL-3.0-or-later')
+makedepends=('binutils')
 depends=('wget' 'aria2' 'zenity' 'polkit' 'libnotify' 'python' 'desktop-file-utils' 'curl' 'sudo' 'lsb-release' 'gnupg')
-provides=('spark-store-console')
-source_x86_64=("spark-store-console_4.8.1-console2_all.deb::https://gitee.com/spark-store-project/spark-store/releases/download/5.0.1/spark-store-console_4.8.1-console2_all.deb")
-sha256sums_x86_64=('91040e57d3369f416ebd169b0388f08d6bb50a514369d52d8748dc53fd312490')
+provides=("spark-store-console=$pkgver")
+# Upstream's release tag does not track the package version, so the download URL
+# cannot be derived from $_pkgver; tools/updaters/declarative.py resolves it
+# through the Gitee release API and writes it here verbatim.
+source=("spark-store-console_${_pkgver}_all.deb::https://gitee.com/spark-store-project/spark-store/releases/download/5.0.1/spark-store-console_4.8.1-console2_all.deb")
+noextract=("spark-store-console_${_pkgver}_all.deb")
+sha256sums=('91040e57d3369f416ebd169b0388f08d6bb50a514369d52d8748dc53fd312490')
 
 prepare() {
-    tar -Jxf data.tar.xz -C "${srcdir}"
+    ar -x "spark-store-console_${_pkgver}_all.deb" data.tar.xz
+    tar -Jxf data.tar.xz -C "$srcdir"
 }
 
 package() {

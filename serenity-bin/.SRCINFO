@@ -1,7 +1,7 @@
 pkgbase = serenity-bin
 	pkgdesc = The configuration generator for sing-box
 	pkgver = 1.1.0beta.3
-	pkgrel = 1
+	pkgrel = 2
 	url = https://github.com/SagerNet/serenity
 	arch = i686
 	arch = x86_64
@@ -9,7 +9,7 @@ pkgbase = serenity-bin
 	arch = armv7h
 	license = custom:GPL-3.0-or-later WITH name use or association addition
 	optdepends = sing-box
-	provides = serenity
+	provides = serenity=1.1.0beta.3
 	conflicts = serenity
 	conflicts = serenity-git
 	backup = etc/serenity/config.json

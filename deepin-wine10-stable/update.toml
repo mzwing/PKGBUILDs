@@ -1,6 +1,7 @@
+# `cmd` is filled in by `pkgtool sync`: the interpreter and script path depend
+# on the checkout, and the package name is already the directory name.
 [check]
 source = "cmd"
-cmd = "python tools/check_version.py deepin-wine10-stable"
 
 [update]
 updater = "apt"

@@ -6,13 +6,13 @@ _pkgname=serenity
 pkgname=serenity-bin
 _pkgver=1.1.0-beta.3
 pkgver=${_pkgver//-/}
-pkgrel=1
+pkgrel=2
 pkgdesc='The configuration generator for sing-box'
 arch=('i686' 'x86_64' 'aarch64' 'armv7h')
 url='https://github.com/SagerNet/serenity'
 license=('custom:GPL-3.0-or-later WITH name use or association addition')
 optdepends=('sing-box')
-provides=('serenity')
+provides=("$_pkgname=$pkgver")
 conflicts=('serenity' 'serenity-git')
 backup=("etc/$_pkgname/config.json")
 source=("LICENSE::$url/raw/v$_pkgver/LICENSE")

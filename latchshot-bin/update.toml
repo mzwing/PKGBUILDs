@@ -1,0 +1,21 @@
+[check]
+source = "github"
+github = "so1ve/latchshot"
+use_latest_release = true
+prefix = "v"
+
+[update]
+updater = "declarative"
+
+[update.version]
+variable = "_pkgver"
+transform = "hyphen_to_underscore"
+
+[[update.assets]]
+kind = "url"
+source_entry = "LICENSE::$url/raw/v$_pkgver/LICENSE"
+
+[[update.assets]]
+kind = "url"
+arches = ["x86_64", "aarch64"]
+source_entry = "$_pkgname-{arch}-unknown-linux-gnu::$url/releases/download/v$_pkgver/$_pkgname-{arch}-unknown-linux-gnu"
