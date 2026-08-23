@@ -6,6 +6,7 @@ import argparse
 import re
 import shutil
 import subprocess
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -22,32 +23,52 @@ SHFMT_ARGS = ["-i", "4"]
 _PKGBASE = re.compile(r"^pkgbase = (.+)$", flags=re.MULTILINE)
 
 
-def verify(repository_root: Path, *, require_makepkg: bool) -> PackageReport:
+@dataclass(frozen=True)
+class Tools:
+    """External programs verify uses, resolved once and passed in explicitly.
+
+    Which checks can run depends on what is installed, so the lookup is a value
+    rather than a hidden call: tests can then pin it instead of behaving
+    differently on a machine that happens to have pacman.
+    """
+
+    makepkg: str | None
+    shfmt: str | None
+
+    @classmethod
+    def discover(cls) -> Tools:
+        return cls(makepkg=shutil.which("makepkg"), shfmt=shutil.which("shfmt"))
+
+
+def verify(
+    repository_root: Path,
+    *,
+    require_makepkg: bool,
+    tools: Tools | None = None,
+) -> PackageReport:
     packages = discover_packages(repository_root)
     if not packages:
         raise RuntimeError("no packages discovered (expected */update.toml)")
 
-    makepkg = shutil.which("makepkg")
-    if require_makepkg and makepkg is None:
+    tools = tools if tools is not None else Tools.discover()
+    if require_makepkg and tools.makepkg is None:
         raise RuntimeError("makepkg is required but was not found")
-    if makepkg is None:
+    if tools.makepkg is None:
         LOGGER.warning("makepkg not found; skipping .SRCINFO regeneration check")
-
-    shfmt = shutil.which("shfmt")
-    if shfmt is None:
+    if tools.shfmt is None:
         LOGGER.warning("shfmt not found; skipping PKGBUILD formatting check")
 
     report = PackageReport("verify")
     for name, package in packages.items():
         with report.package(name):
             _check_syntax(package)
-            _check_formatting(package, shfmt)
+            _check_formatting(package, tools.shfmt)
             _check_pkgname(package)
             _check_pkgbase(package)
             _check_gitignore(package)
             updater, config = _check_update_config(package)
             _check_source_drift(package, updater, config)
-            _check_srcinfo(package, makepkg)
+            _check_srcinfo(package, tools.makepkg)
     return report
 
 
