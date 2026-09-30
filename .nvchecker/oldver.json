@@ -21,8 +21,8 @@
       "creation_time": "2026-09-08T05:05:42Z"
     },
     "latchshot-git": {
-      "version": "719bbe7987f74b8dbb9a9cf52a4a25366debbac3",
-      "revision": "719bbe7987f74b8dbb9a9cf52a4a25366debbac3"
+      "version": "08f72dddc7f884e23bf030ef9fea24a9c4337cea",
+      "revision": "08f72dddc7f884e23bf030ef9fea24a9c4337cea"
     },
     "serenity-bin": {
       "version": "1.1.0-beta.3"
@@ -43,8 +43,8 @@
       "creation_time": "2026-08-22T05:21:51Z"
     },
     "xwayclip-git": {
-      "version": "6e012972f9250e5b4e679340bad27f680cfe6149",
-      "revision": "6e012972f9250e5b4e679340bad27f680cfe6149"
+      "version": "3f593f38b582970e2cf0b1aeec3e2199effbe415",
+      "revision": "3f593f38b582970e2cf0b1aeec3e2199effbe415"
     }
   }
 }
