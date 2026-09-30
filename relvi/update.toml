@@ -1,0 +1,16 @@
+[check]
+source = "github"
+github = "so1ve/relvi"
+use_latest_release = true
+prefix = "relvi-v"
+
+[update]
+updater = "declarative"
+
+[update.version]
+variable = "_pkgver"
+transform = "hyphen_to_underscore"
+
+[[update.assets]]
+kind = "url"
+source_entry = "$pkgname-$_pkgver.tar.gz::$url/archive/refs/tags/$pkgname-v$_pkgver.tar.gz"
