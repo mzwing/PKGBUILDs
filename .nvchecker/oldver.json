@@ -24,6 +24,16 @@
       "version": "08f72dddc7f884e23bf030ef9fea24a9c4337cea",
       "revision": "08f72dddc7f884e23bf030ef9fea24a9c4337cea"
     },
+    "relvi": {
+      "version": "0.1.1",
+      "gitref": "refs/tags/relvi-v0.1.1",
+      "url": "https://github.com/so1ve/relvi/releases/tag/relvi-v0.1.1",
+      "creation_time": "2026-09-30T12:17:35Z"
+    },
+    "relvi-git": {
+      "version": "1ec9974662d998798fc613595fa615904dc0bb50",
+      "revision": "1ec9974662d998798fc613595fa615904dc0bb50"
+    },
     "serenity-bin": {
       "version": "1.1.0-beta.3"
     },
