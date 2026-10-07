@@ -25,14 +25,14 @@
       "revision": "e292455146fee861b2b60cb45e1442843205ea0f"
     },
     "relvi": {
-      "version": "0.1.1",
-      "gitref": "refs/tags/relvi-v0.1.1",
-      "url": "https://github.com/so1ve/relvi/releases/tag/relvi-v0.1.1",
-      "creation_time": "2026-09-30T12:17:35Z"
+      "version": "0.1.2",
+      "gitref": "refs/tags/relvi-v0.1.2",
+      "url": "https://github.com/so1ve/relvi/releases/tag/relvi-v0.1.2",
+      "creation_time": "2026-10-07T08:14:30Z"
     },
     "relvi-git": {
-      "version": "d88b3432b1ab460813d908d3e1ff677f4a0d5148",
-      "revision": "d88b3432b1ab460813d908d3e1ff677f4a0d5148"
+      "version": "8af4809ec8cda8b9c7a8c8a3986b22240639f156",
+      "revision": "8af4809ec8cda8b9c7a8c8a3986b22240639f156"
     },
     "serenity-bin": {
       "version": "1.1.0-beta.3"
@@ -53,8 +53,8 @@
       "creation_time": "2026-08-22T05:21:51Z"
     },
     "xwayclip-git": {
-      "version": "97894ea65fef77d54f4d559a426d54964270f459",
-      "revision": "97894ea65fef77d54f4d559a426d54964270f459"
+      "version": "cdc52560a21f0787e8d78dc69079b4f4efdfa743",
+      "revision": "cdc52560a21f0787e8d78dc69079b4f4efdfa743"
     }
   }
 }
