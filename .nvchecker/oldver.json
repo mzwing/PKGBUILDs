@@ -31,8 +31,8 @@
       "creation_time": "2026-10-07T08:14:30Z"
     },
     "relvi-git": {
-      "version": "7e495386169519b01ff169ef22a0a34f3024a365",
-      "revision": "7e495386169519b01ff169ef22a0a34f3024a365"
+      "version": "51f22f5fb93ed54f18d4e6d918423f661e5e8373",
+      "revision": "51f22f5fb93ed54f18d4e6d918423f661e5e8373"
     },
     "serenity-bin": {
       "version": "1.1.0-beta.3"
@@ -53,8 +53,8 @@
       "creation_time": "2026-08-22T05:21:51Z"
     },
     "xwayclip-git": {
-      "version": "cdc52560a21f0787e8d78dc69079b4f4efdfa743",
-      "revision": "cdc52560a21f0787e8d78dc69079b4f4efdfa743"
+      "version": "3bec63769a42e044714f481a9501bc8b9350fcf9",
+      "revision": "3bec63769a42e044714f481a9501bc8b9350fcf9"
     }
   }
 }
