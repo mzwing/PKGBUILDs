@@ -21,8 +21,8 @@
       "creation_time": "2026-09-08T05:05:42Z"
     },
     "latchshot-git": {
-      "version": "5dc565127d3506e856b3e210472168ee31db5282",
-      "revision": "5dc565127d3506e856b3e210472168ee31db5282"
+      "version": "3658b9efaa2d29c6ed44fd2383b43cfbb6a20cfd",
+      "revision": "3658b9efaa2d29c6ed44fd2383b43cfbb6a20cfd"
     },
     "relvi": {
       "version": "0.1.2",
@@ -53,8 +53,8 @@
       "creation_time": "2026-08-22T05:21:51Z"
     },
     "xwayclip-git": {
-      "version": "3bec63769a42e044714f481a9501bc8b9350fcf9",
-      "revision": "3bec63769a42e044714f481a9501bc8b9350fcf9"
+      "version": "b4c551d24fa78a20548f6a4032b57e13c5f75c87",
+      "revision": "b4c551d24fa78a20548f6a4032b57e13c5f75c87"
     }
   }
 }
