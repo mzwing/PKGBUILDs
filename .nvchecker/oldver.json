@@ -21,8 +21,8 @@
       "creation_time": "2026-09-08T05:05:42Z"
     },
     "latchshot-git": {
-      "version": "874fe70a8c50ac28b53d555045bdce2eafda04f2",
-      "revision": "874fe70a8c50ac28b53d555045bdce2eafda04f2"
+      "version": "e3e9015e870b70e542964a4522c9a70eddbb4d63",
+      "revision": "e3e9015e870b70e542964a4522c9a70eddbb4d63"
     },
     "relvi": {
       "version": "0.1.2",
@@ -31,8 +31,8 @@
       "creation_time": "2026-10-07T08:14:30Z"
     },
     "relvi-git": {
-      "version": "bf9ee671c941dec13df950484e0f8093afd1dcdf",
-      "revision": "bf9ee671c941dec13df950484e0f8093afd1dcdf"
+      "version": "88f6121c8510d68ac3d32ba93a75bf6c08413dc1",
+      "revision": "88f6121c8510d68ac3d32ba93a75bf6c08413dc1"
     },
     "serenity-bin": {
       "version": "1.1.0-beta.3"
@@ -53,8 +53,8 @@
       "creation_time": "2026-08-22T05:21:51Z"
     },
     "xwayclip-git": {
-      "version": "e68a8f65317834da0ca7f8d6c9b62ccd6e1999c7",
-      "revision": "e68a8f65317834da0ca7f8d6c9b62ccd6e1999c7"
+      "version": "80ff2665143f204999f19ee246d16e15564f3212",
+      "revision": "80ff2665143f204999f19ee246d16e15564f3212"
     }
   }
 }
