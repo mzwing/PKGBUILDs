@@ -2,7 +2,7 @@
   "version": 2,
   "data": {
     "deepin-wine10-stable": {
-      "version": "10.14deepin11"
+      "version": "10.14deepin14"
     },
     "hfd-git": {
       "version": "dcc19a065877cb1c75d22b7c5662845e8c8df203",
@@ -21,8 +21,8 @@
       "creation_time": "2026-09-08T05:05:42Z"
     },
     "latchshot-git": {
-      "version": "e3e9015e870b70e542964a4522c9a70eddbb4d63",
-      "revision": "e3e9015e870b70e542964a4522c9a70eddbb4d63"
+      "version": "44a9e400e56a9056ccdd24ff08a62628707b4284",
+      "revision": "44a9e400e56a9056ccdd24ff08a62628707b4284"
     },
     "relvi": {
       "version": "0.1.2",
