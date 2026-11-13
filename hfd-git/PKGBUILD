@@ -1,8 +1,8 @@
 # Maintainer: mzwing <mzwing@mzwing.eu.org>
 
 pkgname=hfd-git
-pkgver=r42.dcc19a0
-pkgrel=2
+pkgver=r43.1e24d53
+pkgrel=1
 pkgdesc='CLI-Tool for download Huggingface models and datasets with curl/aria2/wget'
 arch=('any')
 url='https://gist.github.com/padeoe/697678ab8e528b85a2a7bddafea1fa4f'

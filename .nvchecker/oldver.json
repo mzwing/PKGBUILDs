@@ -5,8 +5,8 @@
       "version": "10.14deepin14"
     },
     "hfd-git": {
-      "version": "dcc19a065877cb1c75d22b7c5662845e8c8df203",
-      "revision": "dcc19a065877cb1c75d22b7c5662845e8c8df203"
+      "version": "1e24d5312a93a5b9faff00b77bb199030169414d",
+      "revision": "1e24d5312a93a5b9faff00b77bb199030169414d"
     },
     "latchshot": {
       "version": "0.3.0",
@@ -31,8 +31,8 @@
       "creation_time": "2026-10-07T08:14:30Z"
     },
     "relvi-git": {
-      "version": "03cd87ceb08ca068f02da30a48cd8e2551930fca",
-      "revision": "03cd87ceb08ca068f02da30a48cd8e2551930fca"
+      "version": "5910a8d0db1cc4474dfccb160d60130b5f08c43f",
+      "revision": "5910a8d0db1cc4474dfccb160d60130b5f08c43f"
     },
     "serenity-bin": {
       "version": "1.1.0-beta.3"
