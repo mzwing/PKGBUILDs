@@ -21,8 +21,8 @@
       "creation_time": "2026-09-08T05:05:42Z"
     },
     "latchshot-git": {
-      "version": "2395176cc705c3bd336c70d1b4d48e925ae8d164",
-      "revision": "2395176cc705c3bd336c70d1b4d48e925ae8d164"
+      "version": "4db4e2814a61e90ca9cea0e86a87949f803dddc9",
+      "revision": "4db4e2814a61e90ca9cea0e86a87949f803dddc9"
     },
     "relvi": {
       "version": "0.1.2",
@@ -31,8 +31,8 @@
       "creation_time": "2026-10-07T08:14:30Z"
     },
     "relvi-git": {
-      "version": "447c51b95e8c216a8c52551a88003594bae90b27",
-      "revision": "447c51b95e8c216a8c52551a88003594bae90b27"
+      "version": "04283c8befd5b803f2c723f2272a5c2b323318f8",
+      "revision": "04283c8befd5b803f2c723f2272a5c2b323318f8"
     },
     "serenity-bin": {
       "version": "1.1.0-beta.3"
