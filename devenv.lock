@@ -60,11 +60,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794951313,
-        "narHash": "sha256-8CWuilBFq9o9Rp0KNaxnA+qBvd125AXUz0xP7zZ7GHw=",
+        "lastModified": 1795162480,
+        "narHash": "sha256-Yuj3BarDzdSQa6KqfJQgWKBusEku+w/JCNb9VCPIvlU=",
         "owner": "cachix",
         "repo": "nixpkgs-python",
-        "rev": "5e4728a41877b4b5d4a447df8c5d5a487afbdcc3",
+        "rev": "bd2cb9c719f07bdd8405d2fe8274c965fe990113",
         "type": "github"
       },
       "original": {
