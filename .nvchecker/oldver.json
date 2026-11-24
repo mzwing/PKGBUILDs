@@ -9,20 +9,20 @@
       "revision": "1e24d5312a93a5b9faff00b77bb199030169414d"
     },
     "latchshot": {
-      "version": "0.3.0",
-      "gitref": "refs/tags/v0.3.0",
-      "url": "https://github.com/so1ve/latchshot/releases/tag/v0.3.0",
-      "creation_time": "2026-09-08T05:05:42Z"
+      "version": "0.4.0",
+      "gitref": "refs/tags/v0.4.0",
+      "url": "https://github.com/so1ve/latchshot/releases/tag/v0.4.0",
+      "creation_time": "2026-11-23T21:16:43Z"
     },
     "latchshot-bin": {
-      "version": "0.3.0",
-      "gitref": "refs/tags/v0.3.0",
-      "url": "https://github.com/so1ve/latchshot/releases/tag/v0.3.0",
-      "creation_time": "2026-09-08T05:05:42Z"
+      "version": "0.4.0",
+      "gitref": "refs/tags/v0.4.0",
+      "url": "https://github.com/so1ve/latchshot/releases/tag/v0.4.0",
+      "creation_time": "2026-11-23T21:16:43Z"
     },
     "latchshot-git": {
-      "version": "6d06b873e831ada90e7229985902b9d4b81b2caa",
-      "revision": "6d06b873e831ada90e7229985902b9d4b81b2caa"
+      "version": "4950ab93b71d20604fe9701c4aacd24e3a5f0538",
+      "revision": "4950ab93b71d20604fe9701c4aacd24e3a5f0538"
     },
     "relvi": {
       "version": "0.1.3",
@@ -53,8 +53,8 @@
       "creation_time": "2026-08-22T05:21:51Z"
     },
     "xwayclip-git": {
-      "version": "478bdfbcc51e5d2365b86bf0db70665784525af6",
-      "revision": "478bdfbcc51e5d2365b86bf0db70665784525af6"
+      "version": "9408609a73df36cef88c11a1763ce36c0624426f",
+      "revision": "9408609a73df36cef88c11a1763ce36c0624426f"
     }
   }
 }
