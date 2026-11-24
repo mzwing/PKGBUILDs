@@ -12,6 +12,7 @@ pkgbase = hfd-git
 	optdepends = wget: alternative download tool (--tool wget)
 	optdepends = jq: faster JSON parsing for file-list retrieval (fallback to grep/awk)
 	provides = hfd=r43.1e24d53
+	conflicts = hfd
 	source = hfd-git::git+https://gist.github.com/padeoe/697678ab8e528b85a2a7bddafea1fa4f.git
 	sha256sums = SKIP
 

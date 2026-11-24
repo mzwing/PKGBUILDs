@@ -13,6 +13,7 @@ optdepends=('aria2: default download tool (4 threads x 5 concurrent, use --tool 
     'wget: alternative download tool (--tool wget)'
     'jq: faster JSON parsing for file-list retrieval (fallback to grep/awk)')
 provides=("hfd=$pkgver")
+conflicts=("hfd")
 source=("$pkgname::git+$url.git")
 sha256sums=('SKIP')
 
